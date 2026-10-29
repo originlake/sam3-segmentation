@@ -6,4 +6,7 @@ select = ["E4", "E7", "E9", "F", "I", "B"]
 
 [lint.per-file-ignores]
 # Entry scripts disable bytecode writing before importing sibling modules.
-"skills/sam3-segmentation/scripts/{segment,sam,model_smoke}.py" = ["E402"]
+"skills/sam3-segmentation/scripts/{segment,sam,model_smoke,rock_export,compact_labelme}.py" = ["E402"]
+
+# Integration tests add the sibling scripts directory before importing tools.
+"skills/sam3-segmentation/scripts/tests/*.py" = ["E402"]

@@ -509,15 +509,16 @@ COMPUTED_FLAGS = {
     "inside_larger_same_label_proposal",
     "outside_whole_object_proposals",
 }
-NESTED_FLAG_FRACTION = 0.87
+NESTED_FLAG_FRACTION = 0.25
 OUTSIDE_FLAG_FRACTION = 0.15
 
 
 def relation_flags(objects, config):
     """Cheap identity warnings for review; never used to delete a proposal.
 
-    - A mask mostly inside a larger same-label proposal is often a part (a wing,
-      a lid, half a kernel) rather than another instance.
+    - A mask with at least 25% of its pixels inside a larger same-label proposal
+      may be a part (a wing, a lid, half a kernel) rather than another instance.
+      This deliberately broad warning requires visual review.
     - A main-label mask largely outside every whole-object proposal (for corn,
       outside every ear) is often background. Skipped when no parents exist.
     """

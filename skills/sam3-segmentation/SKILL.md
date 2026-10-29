@@ -27,6 +27,50 @@ metadata:
 
 # SAM 3 segmentation
 
+Run this skill outside the sandbox environment. Request unsandboxed execution for its commands so the host NVIDIA GPU and driver are accessible; do not infer that the host lacks a GPU from a sandboxed check.
+
+## Individual-rock annotation requirements
+
+For this user's individual-rock annotations, default to **mutually exclusive
+rock regions and solid, hole-free polygons**, unless the user explicitly requests
+a different policy. Fill enclosed background voids, resolve shared pixels to one
+rock, and preserve separate rock identities. Verify zero shared pixels, zero
+positive-area polygon intersections between rocks, and no polygon interior rings
+or enclosed unassigned voids. Keep masks, polygons, areas, boxes and previews
+consistent. Read [rock annotation exports](references/rock-annotations.md) before
+delivering either direct-mode or full-workflow rock annotations. Preserve raw
+model proposals separately; these export edits do not establish ground truth.
+
+Before overlap cleanup, review every nested same-rock proposal flag and inspect
+touching regions for multiple labels on one physical rock, following the identity
+review in the linked rock export reference. Resolve or explicitly mark uncertain
+cases before delivery. Passing geometry checks does not establish instance identity.
+Record derived merges and account for every source proposal, including instances
+that lose all pixels. After any identity edit, rerun hole handling, regenerate all
+deliverables, and verify exact polygon/mask agreement as specified in the reference.
+Use `scripts/rock_export.py` through the base launcher for these derived exports;
+the reference documents decision initialization, merge/export commands and outputs.
+For LabelMe requests, ask the user for the exact shape label name if they have
+not already specified it in the current task or session. Do not infer it from
+the object category or use the converter default as a substitute for asking.
+Continue segmentation and review while awaiting the answer, but wait for it
+before producing the final LabelMe files. Reuse an explicitly supplied label
+without asking again.
+For final LabelMe delivery, use `scripts/compact_labelme.py` through the base
+launcher after identity and tail review, passing the confirmed name with
+`--label NAME`. It unions rectangle pieces and simplifies boundaries with a
+default 0.5-native-pixel tolerance, backing off or retaining the original when
+exact pixel agreement or inter-rock separation would fail. Use
+`--simplify-tolerance 0` to disable the extra simplification. See the linked
+reference for validation, CLI options and fallback.
+
+Before delivering individual-rock annotations, run
+`scripts/highlight_rock_tails.py` through the base launcher on the derived
+annotations and inspect its highlighted thin protrusions against the source.
+See [thin-tail review](references/rock-annotations.md#highlight-thin-tails-before-delivery)
+for the command, scale settings and limitations. This flags possible boundary
+leakage; it does not remove pixels or replace identity and geometry checks.
+
 ## Choose a mode
 
 **Direct SAM calls** (`scripts/sam.py`): the model and nothing else. Use them
@@ -313,6 +357,8 @@ sh "$S/scripts/run" base segment.py export "$R/run"
 
 Deliver `export/`: interactive viewer, one native binary PNG per instance,
 COCO RLE, full proposals, selection/gate provenance, manifest and format checks.
+For individual-rock deliverables, apply the rock annotation requirements above
+in a separate derived export; the stock exporter alone does not enforce them.
 Keep `raw/`, `refinement-raw/`, `threshold-audit.json` and review records locally
 for reproducibility. `export --omit-image` omits the photo; recipients must supply
 the unchanged canonical photo locally for the viewer. It is not a rights clearance.

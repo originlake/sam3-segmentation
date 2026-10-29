@@ -24,8 +24,11 @@ system or a universal best model.
   image adapter expects native local pixels and performs its prescribed mapping.
 - Masks are binary native-size arrays. No inferred hidden surfaces, recreated
   texture, sharpened evidence or smoothed “prettier” contours.
-- Different physical levels overlap: a kernel belongs inside an ear mask. Never
-  suppress masks across categories or flatten them into one exclusive label map.
+- Different physical levels overlap: a kernel belongs inside an ear mask. Preserve
+  intentional cross-category parent/part overlap. For this user's individual-rock
+  exports, follow [rock annotation exports](rock-annotations.md): rock instances
+  must be exclusive and exported polygons solid and hole-free. Keep raw proposals
+  unchanged and apply that policy to a separate derived deliverable.
 - A visibly interrupted instance may have several components. Fragment flags are
   review cues; they do not justify deleting real visible pieces.
 
@@ -87,7 +90,7 @@ stale warning behind.
 
 | Flag | Meaning |
 |---|---|
-| `inside_larger_same_label_proposal` | ≥87% of the mask lies inside a larger proposal of the same label: often a part (wing, lid, half kernel), not another instance |
+| `inside_larger_same_label_proposal` | ≥25% of the mask lies inside a larger proposal of the same label: possible duplicate/part; inspect visually before deciding physical identity. This review threshold is separate from deduplication containment |
 | `outside_whole_object_proposals` | More than 15% of a main-label mask lies outside every whole-object proposal (for corn: every ear). Often background or gap fill; also fires where a parent mask is itself too tight. Only computed when whole-object proposals exist |
 | `point_semantics_unverified` | Came from an anonymous grid point, not a text prompt |
 | `single_pass_only` | No matching proposal from another crop scale |

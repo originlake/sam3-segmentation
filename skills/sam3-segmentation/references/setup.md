@@ -61,7 +61,7 @@ Optional base-only fallback without `uv` (not the locked inference path):
 
 ```sh
 python3.12 -m venv .venv-segmentation
-.venv-segmentation/bin/python -m pip install 'numpy>=1.26,<3' 'scipy>=1.15,<2' 'pillow>=11,<13' 'pycocotools==2.0.11' 'filelock>=3.19,<4'
+.venv-segmentation/bin/python -m pip install 'numpy>=1.26,<3' 'scipy>=1.15,<2' 'pillow>=11,<13' 'pycocotools==2.0.11' 'filelock>=3.19,<4' 'shapely>=2,<3'
 .venv-segmentation/bin/python "$S/scripts/segment.py" demo --out /absolute/new-demo
 ```
 
@@ -112,6 +112,24 @@ cache is reused. Pass `--checkpoint /path/to/sam3.pt` to avoid a new download;
 the actual file checksum, not its filename, identifies it. For offline use,
 install dependencies and obtain weights on an authorized connected machine first.
 Authentication, accepted terms and cache availability are separate checks.
+
+### Persistent checkpoint storage
+
+Keep an approved checkpoint under the skill data directory, for example
+`${XDG_DATA_HOME:-$HOME/.local/share}/sam3-segmentation/checkpoints/sam3.pt`.
+A Hugging Face snapshot cache may resolve to this file through a symlink so
+default lookup and explicit checkpoint use share one copy. Check existing
+storage before downloading, and pass the path to commands that accept
+`--checkpoint`, for example:
+
+```sh
+sh "$S/scripts/run" model segment.py infer "$R/run" --device cuda:0 \
+  --checkpoint "${XDG_DATA_HOME:-$HOME/.local/share}/sam3-segmentation/checkpoints/sam3.pt"
+```
+
+The checkpoint used during local setup had SHA256
+`9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e`.
+Do not remove a checkpoint while relying on a Hugging Face snapshot symlink.
 
 ## 5. Start tiny, then approve the full plan
 
